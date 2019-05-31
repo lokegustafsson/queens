@@ -73,12 +73,12 @@ struct storage
                 best = p;
             }
         }
-        for (ll x : neighbors[best])
+        for (ll x : neighbors[best]) // for each square seen by the new queen
         {
             remove(x);
-            rep(i, 0,N*N)
+            for (ll i : neighbors[x]) // for every square where one visible has been taken
             {
-                if (i == best) continue;
+                if (neighbors[best].count(i) != 0) continue; // dont remove stuff we iterate over, also unnecessary since already called 'remove(x)'
                 neighbors[i].erase(x);
             }
         }
