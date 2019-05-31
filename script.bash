@@ -1,9 +1,9 @@
 SMALL=8
 MEDIUM=8
 LARGE=8
-GREEDYS=100
-GREEDYM=1000
-GREEDYL=3000
+GREEDYS=400
+GREEDYM=10000
+GREEDYL=40000
 
 ./run.out tests/1_queens.in results/1_queens.out $SMALL $GREEDYS
 ./run.out tests/2_queens.in results/2_queens.out $SMALL $GREEDYS
