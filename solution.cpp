@@ -10,35 +10,42 @@ typedef long long ll;
 
 struct storage
 {
-    vi index; // the inverse of value
+    vi index; // the inverse of value, maps pos->index such that value[index[x]]==x for all x in the set
     vector<unordered_set<ll>> neighbors;
-    vi value; // stores positions considered part of the storage set among the first `size` items
+    vi value; // stores positions considered part of the storage set
     ll size;
-    ll len;
+    ll N;
     ll greediness;
     storage(const ll n, const vector<vector<char>> board, const ll greedy)
     {
         greediness = greedy;
-        len = n;
-        size = n*n;
-        rep(i, 0, n)
+        N = n;
+        size = 0;
+        neighbors = vector<unordered_set<ll>>(n*n);
+        index = vi(n*n);
+        rep(x, 0, n)
         {
-            rep(j, 0, n)
+            rep(y, 0, n)
             {
-                if (board[i][j] != 'E')
+                if (board[x][y] != 'E')
                 {
                     continue;
                 }
-                index.push_back(i*n + j);
-                value.push_back(i*n + j);
+                value.push_back(x*n + y);
+                index[x*n + y] = size;
+                size++;
                 rep(dx, -1, 2)
                 {
                     rep(dy, -1, 2)
                     {
-                        ll xp = i; ll yp = i;
+                        if (dx == 0 && dy == 0)
+                        {
+                            continue;
+                        }
+                        ll xp = x; ll yp = y;
                         while (0 <= xp && xp < n && 0 <= yp && yp < n && board[xp][yp]=='E')
                         {
-                            neighbors[n*i+j].insert(n*xp+yp);
+                            neighbors[x*n + y].insert(n*xp + yp);
                             xp+=dx; yp+=dy;
                         }
                     }
@@ -46,44 +53,42 @@ struct storage
             }
         }
     }
-    void remove(pii p)
+    void remove(ll a)
     {
-        ll a = p.first*len+p.second;
-        if (index[a] < size)
-        {
-            size--;
-            value[index[a]] = value[size];
-            index[value[size]] = index[a];
-        }
+        assert(index[a] < size);
+        size--;
+        value[index[a]] = value[size];
+        index[value[size]] = index[a];
+        index[a] = size;
+        value.erase(value.end()-1);
     }
     pii pop()
     {
-        ll best;
+        ll best = -1;
         rep(i, 0, greediness)
         {
             ll p = value[rand() % size];
-            if (neighbors[p].size() < neighbors[best].size())
+            if (best == -1 || neighbors[p].size() < neighbors[best].size())
             {
                 best = p;
             }
         }
         for (ll x : neighbors[best])
         {
-            remove(pii(x/len, x%len));
-            rep(i, 0, len*len)
+            remove(x);
+            rep(i, 0,N*N)
             {
+                if (i == best) continue;
                 neighbors[i].erase(x);
             }
         }
-        return pii(best/len, best%len);
+        return pii(best/N, best%N);
     }
 };
 
-pair<ll, vector<vector<char>>> solve(ll n, vector<vector<char>> board)
+pair<ll, vector<vector<char>>> solve(ll n, vector<vector<char>> board, ll greediness)
 {
     assert(n==board.size() && n==board[0].size());
-
-    storage possible(n, board, 1);
     rep(i, 0, n)
     {
         rep(j, 0, n)
@@ -91,11 +96,13 @@ pair<ll, vector<vector<char>>> solve(ll n, vector<vector<char>> board)
             assert(board[i][j] != 'Q');
         }
     }
+    
+    storage possible(n, board, greediness);
 
-    pii queen;
     ll q = 0;
-    while ( (queen = possible.pop()).first != -1 )
+    while ( possible.size != 0 )
     {
+        pii queen = possible.pop();
         board[queen.first][queen.second] = 'Q';
         q++;
     }

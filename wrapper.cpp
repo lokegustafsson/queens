@@ -8,7 +8,7 @@ typedef long long ll;
 int main(int argc, char *argv[])
 {
     srand(time(0));
-    assert(argc == 4);
+    assert(argc == 5);
     vector<vector<char>> board; 
     ll n;
     {
@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
         }
         fin.close();
     }
-    for (ll iteration = 1; iteration < stoi(argv[3]); iteration++)
+    for (ll iteration = 0; iteration < stoi(argv[3]); iteration++)
     {
-        auto p = solve(n, board);
+        auto p = solve(n, board, stoi(argv[4]));
         ll ans = p.first;
         vector<vector<char>> ansBoard = p.second; 
 
